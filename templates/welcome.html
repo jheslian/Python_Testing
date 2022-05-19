@@ -16,6 +16,7 @@
        </ul>
     {% endif%}
     Points available: {{club['points']}}
+    <p><a href="{{url_for('showClubPoints')}}">Show all clubs points</a></p>
     <h3>Competitions:</h3>
     <ul>
         {% for comp in competitions%}
