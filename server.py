@@ -49,23 +49,32 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
-    if int(competition['numberOfPlaces']) < placesRequired or int(club['points']) < placesRequired or \
-            placesRequired > MAX_PLACE_PER_CLUB or int(competition['numberOfPlaces']) == 0:
-        if int(club['points']) < placesRequired:
-            flash(f"Not enough points. There's only {club['points']} club points left.")
-        if int(competition['numberOfPlaces']) < placesRequired:
-            flash(f"Not enough place.There's only {competition['numberOfPlaces']} places left.")
-        if placesRequired > MAX_PLACE_PER_CLUB:
-            flash('You can only book 12 places.')
-        if int(competition['numberOfPlaces']) == 0:
-            flash("There's no more place left.")
+    if request.method == 'POST' and placesRequired:
+        tmpTotalPoints = 0
+        if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
+            tmpTotalPoints = int(club['noOfPlacesBookedOnCompetitions'][competition['name']]) + placesRequired
+        if int(competition['numberOfPlaces']) < placesRequired or int(club['points']) < placesRequired or \
+                tmpTotalPoints > MAX_PLACE_PER_CLUB or int(competition['numberOfPlaces']) == 0:
+            if int(club['points']) < placesRequired:
+                flash(f"Not enough points. There's only {club['points']} club points left.")
+            if int(competition['numberOfPlaces']) < placesRequired:
+                flash(f"Not enough place.There's only {competition['numberOfPlaces']} places left.")
+            if tmpTotalPoints > MAX_PLACE_PER_CLUB:
+                flash('You can only book 12 places.')
+            if int(competition['numberOfPlaces']) == 0:
+                flash("There's no more place left.")
 
-        return render_template('booking.html', club=club, competition=competition)
-
+            return render_template('booking.html', club=club, competition=competition)
+        else:
+            updateNumberPlacesBookAndPointsByClubInJSONFile(club, competition, placesRequired)
+            # return redirect(url_for('book', club=club, competition=competition))
 
     competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
     club['points'] = int(club['points']) - placesRequired
+    updateNumberOfPlacesAvailableInCompetitionJSONFile(competition, placesRequired)
+
     flash('Great-booking complete!')
+    flash(f"You have succesfully booked {placesRequired} place. The club has only {club['points']} points left.")
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
@@ -78,3 +87,33 @@ def showClubPoints():
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
+
+
+def updateNumberPlacesBookAndPointsByClubInJSONFile(club, competition, noOfPlaces):
+    competitionName = competition['name']
+
+    with open("clubs.json", "r") as jsonFile:
+        data = json.load(jsonFile)
+
+        for i in data['clubs']:
+            if i['name'] == club['name']:
+                i['points'] = str(int(i['points']) - noOfPlaces)
+                if competitionName in i['noOfPlacesBookedOnCompetitions']:
+                    i['noOfPlacesBookedOnCompetitions'][competitionName] += noOfPlaces
+                else:
+                    i['noOfPlacesBookedOnCompetitions'][competitionName] = noOfPlaces
+
+        with open("clubs.json", "w") as jsonFile:
+            json.dump(data, jsonFile)
+
+
+def updateNumberOfPlacesAvailableInCompetitionJSONFile(competition, noOfPlaces):
+    with open("competitions.json", "r") as jsonFile:
+        data = json.load(jsonFile)
+
+        for i in data['competitions']:
+            if i['name'] == competition['name']:
+                i['numberOfPlaces'] = str(int(i['numberOfPlaces']) - noOfPlaces)
+
+        with open("competitions.json", "w") as jsonFile:
+            json.dump(data, jsonFile)
