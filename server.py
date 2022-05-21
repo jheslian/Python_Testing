@@ -1,5 +1,5 @@
 import json
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, url_for, session
 
 
 def loadClubs():
@@ -28,12 +28,22 @@ def index():
 
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
-    club = [club for club in clubs if club['email'] == request.form['email']]
+    try:
+        session['email'] = request.form['email']
+        club = [club for club in clubs if club['email'] == request.form['email']]
+
+        if not club:
+            return userFailedCredentialRedirection()
+    except KeyError:
+        return userFailedCredentialRedirection()
+
     return render_template('welcome.html', club=club[0], competitions=competitions)
 
 
 @app.route('/book/<competition>/<club>')
 def book(competition, club):
+    if 'email' not in session:
+        return userFailedCredentialRedirection()
     foundClub = [c for c in clubs if c['name'] == club][0]
     foundCompetition = [c for c in competitions if c['name'] == competition][0]
     if foundClub and foundCompetition:
@@ -45,6 +55,8 @@ def book(competition, club):
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
+    if request.method != 'POST':
+        return userFailedCredentialRedirection()
     MAX_PLACE_PER_CLUB = 12
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
@@ -53,13 +65,14 @@ def purchasePlaces():
         tmpTotalPoints = 0
         if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
             tmpTotalPoints = int(club['noOfPlacesBookedOnCompetitions'][competition['name']]) + placesRequired
+        print('toa', tmpTotalPoints)
         if int(competition['numberOfPlaces']) < placesRequired or int(club['points']) < placesRequired or \
                 tmpTotalPoints > MAX_PLACE_PER_CLUB or int(competition['numberOfPlaces']) == 0:
             if int(club['points']) < placesRequired:
                 flash(f"Not enough points. There's only {club['points']} club points left.")
             if int(competition['numberOfPlaces']) < placesRequired:
                 flash(f"Not enough place.There's only {competition['numberOfPlaces']} places left.")
-            if tmpTotalPoints > MAX_PLACE_PER_CLUB:
+            if placesRequired > MAX_PLACE_PER_CLUB or tmpTotalPoints > MAX_PLACE_PER_CLUB:
                 flash('You can only book 12 places.')
             if int(competition['numberOfPlaces']) == 0:
                 flash("There's no more place left.")
@@ -86,6 +99,14 @@ def showClubPoints():
 
 @app.route('/logout')
 def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+
+def userFailedCredentialRedirection():
+    if session:
+        session.clear()
+    flash("Access denied. You're not log in or your email is not a valid.")
     return redirect(url_for('index'))
 
 
