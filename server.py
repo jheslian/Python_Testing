@@ -28,6 +28,10 @@ def index():
 
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
+    clubs = loadClubs()
+    competitions = loadCompetitions()
+    for club in clubs:
+        club['totalPointsUsed'] = sum(club['noOfPlacesBookedOnCompetitions'].values())
     try:
         session['email'] = request.form['email']
         club = [club for club in clubs if club['email'] == request.form['email']]
@@ -42,6 +46,8 @@ def showSummary():
 
 @app.route('/book/<competition>/<club>')
 def book(competition, club):
+    competitions = loadCompetitions()
+    clubs = loadClubs()
     if 'email' not in session:
         return userFailedCredentialRedirection()
     foundClub = [c for c in clubs if c['name'] == club][0]
@@ -57,7 +63,6 @@ def book(competition, club):
 def purchasePlaces():
     competitions = loadCompetitions()
     clubs = loadClubs()
-    print(clubs)
     if request.method != 'POST':
         return userFailedCredentialRedirection()
     MAX_PLACE_PER_CLUB = 12
@@ -68,7 +73,6 @@ def purchasePlaces():
         tmpTotalPoints = 0
         if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
             tmpTotalPoints = int(club['noOfPlacesBookedOnCompetitions'][competition['name']]) + placesRequired
-        print('toa', tmpTotalPoints)
         if int(competition['numberOfPlaces']) < placesRequired or int(club['points']) < placesRequired or \
                 tmpTotalPoints > MAX_PLACE_PER_CLUB or int(competition['numberOfPlaces']) == 0:
             if int(club['points']) < placesRequired:
@@ -85,12 +89,16 @@ def purchasePlaces():
             updateNumberPlacesBookAndPointsByClubInJSONFile(club, competition, placesRequired)
             # return redirect(url_for('book', club=club, competition=competition))
 
-    #competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-    #club['points'] = int(club['points']) - placesRequired
-    updateNumberOfPlacesAvailableInCompetitionJSONFile(competition, placesRequired)
+    # competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
+    # club['points'] = int(club['points']) - placesRequired
+    # updateNumberOfPlacesAvailableInCompetitionJSONFile(competition, placesRequired)
+
+    for club in clubs:
+        club['totalPointsUsed'] = sum(club['noOfPlacesBookedOnCompetitions'].values())
 
     flash('Great-booking complete!')
     flash(f"You have succesfully booked {placesRequired} place. The club has only {club['points']} points left.")
+
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
@@ -105,13 +113,12 @@ def showClubPoints():
     return render_template('points.html', clubs=clubs, competitions=competitions)
 
 
-@app.route('/reservation/<competition>/<club>')
-def clubReservation(competition, club):
-  print("com", competition)
-  clubs = loadClubs()
-  foundCompetition = [c for c in competitions if c['name'] == competition][0]
+@app.route('/reservation/<competition>')
+def clubReservation(competition):
+    clubs = loadClubs()
+    foundCompetition = [c for c in competitions if c['name'] == competition][0]
 
-  return render_template('reservation.html', clubs=clubs, competition=foundCompetition)
+    return render_template('reservation.html', clubs=clubs, competition=foundCompetition)
 
 
 @app.route('/logout')
@@ -135,7 +142,6 @@ def updateNumberPlacesBookAndPointsByClubInJSONFile(club, competition, noOfPlace
 
         for i in data['clubs']:
             if i['name'] == club['name']:
-                i['points'] = str(int(i['points']) - noOfPlaces)
                 if competitionName in i['noOfPlacesBookedOnCompetitions']:
                     i['noOfPlacesBookedOnCompetitions'][competitionName] += noOfPlaces
                 else:
