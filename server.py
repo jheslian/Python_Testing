@@ -92,9 +92,14 @@ def purchasePlaces():
 
 
 # TODO: Add route for points display
-@app.route('/points')
+@app.route('/points', methods=['GET'])
 def showClubPoints():
-    return render_template('points.html', clubs=clubs)
+    print(session)
+    clubs = loadClubs()
+    competitions = loadCompetitions()
+    for club in clubs:
+        club['totalPointsUsed'] = sum(club['noOfPlacesBookedOnCompetitions'].values())
+    return render_template('points.html', clubs=clubs, competitions=competitions)
 
 
 @app.route('/logout')
