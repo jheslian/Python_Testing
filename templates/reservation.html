@@ -15,22 +15,28 @@
             </ul>
         {% endif %}
     {% endwith %}
-
-
+    <h3>{{ competition['name'] }} Competition</h3>
     <table>
     <tr>
         <td><strong>Club name</strong></td>
-        <td><strong>Total Points</strong></td>
-        <td><strong>Points Available</strong></td>
+        <td><strong>No. of place reserved</strong></td>
     </tr>
     {% for club in clubs %}
         <tr>
             <td>{{ club['name'] }}</td>
-            <td style="text-align:center">{{ club['points'] }}</td>
-            <td style="text-align:center">{{ club['points']|int - club['totalPointsUsed']|int }}</td>
+            <td style="text-align:center">
+                {% if competition['name'] in club['noOfPlacesBookedOnCompetitions'] %}
+                    {% for comp, point in club['noOfPlacesBookedOnCompetitions'].items() %}
+                        {% if comp == competition['name']  %}
+                            {{ point }}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    0
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>
-
     </body>
 </html>

@@ -55,6 +55,9 @@ def book(competition, club):
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
+    competitions = loadCompetitions()
+    clubs = loadClubs()
+    print(clubs)
     if request.method != 'POST':
         return userFailedCredentialRedirection()
     MAX_PLACE_PER_CLUB = 12
@@ -82,8 +85,8 @@ def purchasePlaces():
             updateNumberPlacesBookAndPointsByClubInJSONFile(club, competition, placesRequired)
             # return redirect(url_for('book', club=club, competition=competition))
 
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-    club['points'] = int(club['points']) - placesRequired
+    #competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
+    #club['points'] = int(club['points']) - placesRequired
     updateNumberOfPlacesAvailableInCompetitionJSONFile(competition, placesRequired)
 
     flash('Great-booking complete!')
@@ -100,6 +103,15 @@ def showClubPoints():
     for club in clubs:
         club['totalPointsUsed'] = sum(club['noOfPlacesBookedOnCompetitions'].values())
     return render_template('points.html', clubs=clubs, competitions=competitions)
+
+
+@app.route('/reservation/<competition>/<club>')
+def clubReservation(competition, club):
+  print("com", competition)
+  clubs = loadClubs()
+  foundCompetition = [c for c in competitions if c['name'] == competition][0]
+
+  return render_template('reservation.html', clubs=clubs, competition=foundCompetition)
 
 
 @app.route('/logout')
