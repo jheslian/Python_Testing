@@ -3,20 +3,17 @@
     {
       "name": "Simply Lift",
       "email": "john@simplylift.co",
-      "points": "13",
-      "noOfPlacesBookedOnCompetitions": {}
+      "points": "13"
     },
     {
       "name": "Iron Temple",
       "email": "admin@irontemple.com",
-      "points": "4",
-      "noOfPlacesBookedOnCompetitions": {}
+      "points": "4"
     },
     {
       "name": "She Lifts",
       "email": "kate@shelifts.co.uk",
-      "points": "12",
-      "noOfPlacesBookedOnCompetitions": {}
+      "points": "12"
     }
   ]
 }

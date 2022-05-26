@@ -15,7 +15,8 @@
         {% endfor %}
        </ul>
     {% endif%}
-    Points available: {{ club['points']|int - club['totalPointsUsed']|int }}
+    Points available:{{ club['points']|int }}
+
     <h3>Competitions:</h3>
     <ul>
         {% for comp in competitions%}

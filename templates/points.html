@@ -19,15 +19,15 @@
 
     <table>
     <tr>
-        <td><strong>Club name</strong></td>
-        <td><strong>Total Points</strong></td>
-        <td><strong>Points Available</strong></td>
+        <th>Club name</th>
+        <th style=""><strong>Total points used</strong></th>
+        <th><strong>Points available</strong></th>
     </tr>
     {% for club in clubs %}
         <tr>
             <td>{{ club['name'] }}</td>
-            <td style="text-align:center">{{ club['points'] }}</td>
-            <td style="text-align:center">{{ club['points']|int - club['totalPointsUsed']|int }}</td>
+            <td style="text-align:center">{{ club['totalPointsUsed'] }}</td>
+            <td style="text-align:center">{{ club['points']|int }}</td>
         </tr>
     {% endfor %}
     </table>
