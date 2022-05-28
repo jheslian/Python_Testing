@@ -3,13 +3,13 @@ from flask import Flask, render_template, request, redirect, flash, url_for, ses
 
 
 def loadClubs():
-    with open('clubs.json') as c:
+    with open('../clubs.json') as c:
         listOfClubs = json.load(c)['clubs']
         return listOfClubs
 
 
 def loadCompetitions():
-    with open('competitions.json') as comps:
+    with open('../competitions.json') as comps:
         listOfCompetitions = json.load(comps)['competitions']
         return listOfCompetitions
 
@@ -34,21 +34,23 @@ def showSummary():
             session['email'] = club['email']
         else:
             club = [club for club in clubs if club['email'] == session['email']][0]
-        if not club:
+        """if not club:
             return userFailedCredentialRedirection()
-
+"""
         if 'noOfPlacesBookedOnCompetitions' in club:
             club['totalPointsUsed'] = sum(club['noOfPlacesBookedOnCompetitions'].values())
 
     except KeyError:
-        return userFailedCredentialRedirection()
+        return userFailedCredentialRedirection(KeyError)
+    except IndexError:
+        return userFailedCredentialRedirection(IndexError)
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
 @app.route('/book/<competition>/<club>')
 def book(competition, club):
     if 'email' not in session:
-        return userFailedCredentialRedirection()
+        return userFailedCredentialRedirection(KeyError)
     try:
         foundClub = [c for c in clubs if c['name'] == club][0]
         foundCompetition = [c for c in competitions if c['name'] == competition][0]
@@ -65,7 +67,7 @@ def book(competition, club):
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     if request.method != 'POST':
-        return userFailedCredentialRedirection()
+        return userFailedCredentialRedirection(KeyError)
 
     MAX_PLACE_PER_CLUB = 12
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
@@ -77,11 +79,8 @@ def purchasePlaces():
 
             if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
                 tmpTotalPoints = int(club['noOfPlacesBookedOnCompetitions'][competition['name']]) + placesRequired
-            # club['totalPointsUsed'] = sum(club['noOfPlacesBookedOnCompetitions'].values())
         else:
-
             tmpTotalPoints = placesRequired
-            # club['totalPointsUsed'] = placesRequired
         if int(competition['numberOfPlaces']) < placesRequired or int(club['points']) < placesRequired or \
                 tmpTotalPoints > MAX_PLACE_PER_CLUB or int(competition['numberOfPlaces']) == 0:
             if int(club['points']) < placesRequired:
@@ -95,9 +94,6 @@ def purchasePlaces():
 
             return render_template('booking.html', club=club, competition=competition)
 
-        """else:
-            
-            club['noOfPlacesBookedOnCompetitions'][competition['name']]= placesRequired"""
         if 'noOfPlacesBookedOnCompetitions' in club:
             if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
                 club['noOfPlacesBookedOnCompetitions'][competition['name']] = int(
@@ -142,9 +138,11 @@ def logout():
     return redirect(url_for('index'))
 
 
-def userFailedCredentialRedirection():
+def userFailedCredentialRedirection(error):
     if session:
         session.clear()
-    flash("Access denied. You're not log in or your email is not a valid.")
+    if error is KeyError:
+        flash("Access denied. You're not log in.")
+    else:
+        flash("Access denied.You're email is not a valid.")
     return redirect(url_for('index'))
-

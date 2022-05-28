@@ -2,6 +2,7 @@ from locust import HttpUser, task
 
 
 class ProjectPerfTest(HttpUser):
+
     @task
     def home(self):
         self.client.get("/")
@@ -17,8 +18,8 @@ class ProjectPerfTest(HttpUser):
     @task
     def purchasePlaces(self):
         self.client.post("/purchasePlaces", {"competition": "Spring Festival",
-                                            "club": "Simply Lift",
-                                            "places": "1"})
+                                             "club": "Simply Lift",
+                                             "places": "1"})
 
     @task
     def points(self):
@@ -27,6 +28,7 @@ class ProjectPerfTest(HttpUser):
     @task
     def clubReservation(self):
         self.client.get("/reservation/Spring%20Festival")
+        
 
     @task
     def logout(self):
