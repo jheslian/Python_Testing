@@ -1,4 +1,4 @@
-from server import app, clubs, competitions
+from server import app, clubs, competitions, POINTS_PER_PLACE
 
 
 class TestPoints:
@@ -12,13 +12,13 @@ class TestPoints:
                                     data={"competition": competitions[1]['name'],
                                           "club": clubs[0]['name'],
                                           "places": "2"})
-        expected_points = 11
+        expected_points_left = 7
         expected_club = 'Simply Lift'
         expected_competition = 'Spring Festival'
         assert response.status_code == 302
         assert competitions[0]['name'] == expected_competition
         assert clubs[0]['name'] == expected_club
-        assert clubs[0]['points'] == expected_points
+        assert clubs[0]['points'] == expected_points_left
 
     def test_pointsUsedSuccess(self):
         response = self.client.post('/purchasePlaces',

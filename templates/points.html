@@ -26,7 +26,7 @@
     {% for club in clubs %}
         <tr>
             <td>{{ club['name'] }}</td>
-            <td style="text-align:center">{{ club['totalPointsUsed'] }}</td>
+            <td style="text-align:center">{{ club['totalPlaceReserved'] * 3 }}</td>
             <td style="text-align:center">{{ club['points']|int }}</td>
         </tr>
     {% endfor %}

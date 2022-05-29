@@ -14,22 +14,22 @@ def test_loginWithPurchasePlaces():
         client.post('/purchasePlaces',
                     data={"competition": competitions[1]['name'],
                           "club": clubs[0]['name'],
-                          "places": "5"}, follow_redirects=True)
+                          "places": "2"}, follow_redirects=True)
         client.post('/purchasePlaces',
                     data={"competition": competitions[0]['name'],
                           "club": clubs[0]['name'],
-                          "places": "3"}, follow_redirects=True)
+                          "places": "2"}, follow_redirects=True)
 
-        expectedPoints = 8
-        assert sum(clubs[0]['noOfPlacesBookedOnCompetitions'].values()) == expectedPoints
+        expectedPlaces = 4
+        assert sum(clubs[0]['noOfPlacesBookedOnCompetitions'].values()) == expectedPlaces
 
 
 def test_checkPublicCLubPoints():
     with app.test_client() as client:
         response = client.get('/points')
         assert response.status_code == 200
-        assert clubs[0]['totalPointsUsed'] == 8
-        assert clubs[0]['points'] == 5
+        assert clubs[0]['totalPlaceReserved'] == 4
+        assert clubs[0]['points'] == 1
 
 
 def test_checkReservationPlaceInCompetition():
@@ -41,5 +41,5 @@ def test_checkReservationPlaceInCompetition():
         expectedCompetitionName = 'Spring Festival'
         assert response.status_code == 200
         assert 'Spring Festival' in clubs[0]['noOfPlacesBookedOnCompetitions']
-        assert clubs[0]['noOfPlacesBookedOnCompetitions'][expectedCompetitionName] == 3
+        assert clubs[0]['noOfPlacesBookedOnCompetitions'][expectedCompetitionName] == 2
         assert clubs[0]['name'] == expectedClubName
