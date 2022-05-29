@@ -1,4 +1,5 @@
-from server import loadCompetitions
+from utils import loadCompetitions
+
 
 def test_loadClubs():
     data = loadCompetitions()

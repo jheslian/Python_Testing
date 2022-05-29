@@ -1,4 +1,4 @@
-from server import loadClubs
+from utils import loadClubs
 
 
 def test_loadClubs():

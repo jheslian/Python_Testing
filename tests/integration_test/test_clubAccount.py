@@ -1,4 +1,5 @@
-from server import app, competitions, clubs
+from server import app
+from utils import competitions, clubs
 import flask
 
 
@@ -8,9 +9,6 @@ def test_loginWithPurchasePlaces():
             session['email'] = 'john@simplylift.co'
 
         response = client.post('/showSummary', data={"email": "john@simplylift.co"})
-        assert flask.session['email'] == 'john@simplylift.co'
-        assert response.status_code == 200
-
         client.post('/purchasePlaces',
                     data={"competition": competitions[1]['name'],
                           "club": clubs[0]['name'],
@@ -20,8 +18,12 @@ def test_loginWithPurchasePlaces():
                           "club": clubs[0]['name'],
                           "places": "2"}, follow_redirects=True)
 
-        expectedPlaces = 4
-        assert sum(clubs[0]['noOfPlacesBookedOnCompetitions'].values()) == expectedPlaces
+        expectedPlacesBooked = 4
+        expectedPointsLeft = 1
+        assert flask.session['email'] == 'john@simplylift.co'
+        assert response.status_code == 200
+        assert sum(clubs[0]['noOfPlacesBookedOnCompetitions'].values()) == expectedPlacesBooked
+        assert clubs[0]['points'] == expectedPointsLeft
 
 
 def test_checkPublicCLubPoints():
@@ -39,7 +41,8 @@ def test_checkReservationPlaceInCompetition():
         response = client.get('/reservation/Spring%20Festival')
         expectedClubName = 'Simply Lift'
         expectedCompetitionName = 'Spring Festival'
+        expectedPlacesBookInSpringFestival = 2
         assert response.status_code == 200
         assert 'Spring Festival' in clubs[0]['noOfPlacesBookedOnCompetitions']
-        assert clubs[0]['noOfPlacesBookedOnCompetitions'][expectedCompetitionName] == 2
+        assert clubs[0]['noOfPlacesBookedOnCompetitions'][expectedCompetitionName] == expectedPlacesBookInSpringFestival
         assert clubs[0]['name'] == expectedClubName

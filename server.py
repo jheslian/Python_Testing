@@ -1,29 +1,7 @@
-import json
 from datetime import datetime
+from flask import render_template, request, redirect, flash, url_for, session
+from utils import app, MAX_PLACE_PER_CLUB, POINTS_PER_PLACE, competitions, clubs
 
-from flask import Flask, render_template, request, redirect, flash, url_for, session
-
-
-def loadClubs():
-    with open('clubs.json') as c:
-        listOfClubs = json.load(c)['clubs']
-        return listOfClubs
-
-
-def loadCompetitions():
-    with open('competitions.json') as comps:
-        listOfCompetitions = json.load(comps)['competitions']
-        return listOfCompetitions
-
-
-app = Flask(__name__)
-app.secret_key = 'something_special'
-
-competitions = loadCompetitions()
-clubs = loadClubs()
-
-POINTS_PER_PLACE = 3
-MAX_PLACE_PER_CLUB = 12
 
 @app.route('/')
 def index():
@@ -80,20 +58,24 @@ def purchasePlaces():
     totalPointsRaquired = placesRequired * POINTS_PER_PLACE
     if request.method == 'POST' and placesRequired:
         tmpTotalPoints = 0
+        tmpTotalPlacesReserved = 0
         if 'noOfPlacesBookedOnCompetitions' in club:
 
             if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
                 tmpTotalPoints = (int(club['noOfPlacesBookedOnCompetitions'][
                                           competition['name']]) * POINTS_PER_PLACE) + totalPointsRaquired
+            tmpTotalPlacesReserved = sum(club['noOfPlacesBookedOnCompetitions'].values()) + placesRequired
+
         else:
             tmpTotalPoints = totalPointsRaquired
         if int(competition['numberOfPlaces']) < placesRequired or int(club['points']) < placesRequired or \
-                tmpTotalPoints > MAX_PLACE_PER_CLUB or int(competition['numberOfPlaces']) == 0:
+                tmpTotalPoints > MAX_PLACE_PER_CLUB or tmpTotalPlacesReserved > MAX_PLACE_PER_CLUB or \
+                int(competition['numberOfPlaces']) == 0:
             if int(club['points']) < totalPointsRaquired:
                 flash(f"Not enough points. There's only {club['points']} club points left.")
             if int(competition['numberOfPlaces']) < placesRequired:
                 flash(f"Not enough place.There's only {competition['numberOfPlaces']} places left.")
-            if placesRequired > MAX_PLACE_PER_CLUB:
+            if placesRequired > MAX_PLACE_PER_CLUB or tmpTotalPlacesReserved > MAX_PLACE_PER_CLUB:
                 flash('You can only book 12 places.')
             if int(competition['numberOfPlaces']) == 0:
                 flash("There's no more place left.")
