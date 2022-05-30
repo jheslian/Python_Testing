@@ -1,12 +1,10 @@
-from server import app
-from utils import competitions, clubs
+from utils import app, clubs, competitions
 
 
-class TestPoints:
+class TestPurchasePlaces:
     client = app.test_client()
     test_competitions = competitions
     test_clubs = clubs
-
     def test_pointsLeft(self):
         with app.test_client() as client:
             with client.session_transaction() as session:
@@ -19,9 +17,9 @@ class TestPoints:
         expected_club = 'Simply Lift'
         expected_competition = 'Spring Festival'
         assert response.status_code == 200
-        assert competitions[0]['name'] == expected_competition
-        assert clubs[0]['name'] == expected_club
-        assert clubs[0]['points'] == expected_points_left
+        assert self.test_competitions[0]['name'] == expected_competition
+        assert self.test_clubs[0]['name'] == expected_club
+        assert self.test_clubs[0]['points'] == expected_points_left
 
     def test_totalPlacesReserve(self):
         response = self.client.post('/purchasePlaces',

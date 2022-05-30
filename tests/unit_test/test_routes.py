@@ -1,4 +1,4 @@
-from server import app
+from utils import app
 
 
 class TestRoutes:
