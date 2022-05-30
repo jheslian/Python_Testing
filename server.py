@@ -80,7 +80,7 @@ def purchasePlaces():
             if int(competition['numberOfPlaces']) == 0:
                 flash("There's no more place left.")
 
-            return render_template('booking.html', club=club, competition=competition)
+            return redirect(url_for('showSummary'))
 
         if 'noOfPlacesBookedOnCompetitions' in club:
             if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
