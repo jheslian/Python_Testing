@@ -10,7 +10,7 @@ An application where users can book or reserve a place in strength competitions 
 	- Test the application using pytest or unittest and its performance with locust
 
 
-3. Getting Started
+2. Getting Started
 
     This project uses the following technologies:
 
@@ -24,7 +24,7 @@ An application where users can book or reserve a place in strength competitions 
         Before you begin, please ensure you have this installed globally. 
 
 
-4. Installation
+3. Installation
 
     - After cloning, change into the directory and type <code>virtualenv .</code>. This will then set up a a virtual python environment within that directory.
 
@@ -36,9 +36,16 @@ An application where users can book or reserve a place in strength competitions 
 
     - To run the application type either <code>flask run</code> or <code>python -m flask run</code>. The app should respond with an address you should be able to go to using your browser.
 
-5. Current Setup
+4. Current Setup
 
     The app is powered by [JSON files](https://www.tutorialspoint.com/json/json_quick_guide.htm). This is to get around having a DB until we actually need one. This are:
      
     * competitions.json - list of competitions
     * clubs.json - list of clubs with relevant information. You can look here to see what email addresses the app will accept for login.
+
+5. Tests
+
+    Testing the application with unit test and integration test with pytest and to check if the test has been passed:
+    
+    * run `pytest tests/unit_test` for unit test and
+    * run `pytest tests/integration_test` for test integration
