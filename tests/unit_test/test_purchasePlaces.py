@@ -5,10 +5,10 @@ class TestPurchasePlaces:
     client = app.test_client()
     test_competitions = competitions
     test_clubs = clubs
+
     def test_pointsLeft(self):
-        with app.test_client() as client:
-            with client.session_transaction() as session:
-                session['email'] = 'john@simplylift.co'
+        with self.client.session_transaction() as session:
+            session['email'] = 'john@simplylift.co'
         response = self.client.post('/purchasePlaces',
                                     data={"competition": self.test_competitions[1]['name'],
                                           "club": self.test_clubs[0]['name'],
@@ -45,7 +45,7 @@ class TestPurchasePlaces:
         response = self.client.post('/purchasePlaces',
                                     data={"competition": self.test_competitions[0]['name'],
                                           "club": self.test_clubs[0]['name'],
-                                          "places": "11"})
+                                          "places": "11"}, follow_redirects=True)
 
         data = response.get_data(as_text=True)
         expected_error = 'You can only book 12 places.'
@@ -56,7 +56,7 @@ class TestPurchasePlaces:
         response = self.client.post('/purchasePlaces',
                                     data={"competition": self.test_competitions[1]['name'],
                                           "club": self.test_clubs[1]['name'],
-                                          "places": "11"})
+                                          "places": "11"}, follow_redirects=True)
         data = response.get_data(as_text=True)
         expected_error = 'Not enough place.There&#39;s only 10 places left.'
         assert response.status_code == 200
