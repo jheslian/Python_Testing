@@ -49,3 +49,11 @@ An application where users can book or reserve a place in strength competitions 
     
     * run `pytest tests/unit_test` for unit test and
     * run `pytest tests/integration_test` for test integration
+    
+    For locust: *make sure the application is running before running locust*
+    on the other terminal:
+    * activate the virtual environment
+    * locate locustfile with ` cd tests/perfomance_tests/`
+    * run locust with `locust`
+    * open the server indicate and simulate user then run
+    
