@@ -8,27 +8,27 @@ class TestRoutes:
         response = self.client.get('/')
         assert response.status_code == 200
 
-    def test_publicPoints(self):
+    def test_public_points(self):
         response = self.client.get('/points')
         assert response.status_code == 200
 
-    def test_loginWithEmailExisting(self):
-        response = self.client.post('/showSummary', data={"email": "john@simplylift.co"})
+    def test_login_with_email_existing(self):
+        response = self.client.post('/show_summary', data={"email": "john@simplylift.co"})
 
         assert response.status_code == 200
 
-    def test_loginWithWrongEmail(self):
-        response = self.client.post('/showSummary', data={"email": "wrong@email.fr"}, follow_redirects=True)
+    def test_login_with_wrong_email(self):
+        response = self.client.post('/show_summary', data={"email": "wrong@email.fr"}, follow_redirects=True)
         assert response.status_code == 200
 
-    def test_purchasePlaces(self):
-        response = self.client.post("/purchasePlaces", data={"competition": "Spring Festival",
-                                                             "club": "Simply Lift",
-                                                             "places": "1"}, follow_redirects=True)
+    def test_purchase_places(self):
+        response = self.client.post("/purchase_places", data={"competition": "Spring Festival",
+                                                              "club": "Simply Lift",
+                                                              "places": "1"}, follow_redirects=True)
         assert response.status_code == 200
 
-    def test_competitionReservation(self):
-        response = self.client.get('/reservation/Spring%20Festival')
+    def test_competition_reservation(self):
+        response = self.client.get('/reservation/Spring%20Festival', follow_redirects=True)
         assert response.status_code == 200
 
     def test_logout(self):

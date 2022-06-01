@@ -8,8 +8,8 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/showSummary', methods=['GET', 'POST'])
-def showSummary():
+@app.route('/show_summary', methods=['GET', 'POST'])
+def show_summary():
     try:
         if request.method == 'POST':
             club = [club for club in clubs if club['email'] == request.form['email']][0]
@@ -21,90 +21,90 @@ def showSummary():
             club['totalPlaceReserved'] = sum(club['noOfPlacesBookedOnCompetitions'].values())
 
     except KeyError:
-        return userFailedCredentialRedirection(KeyError)
+        return user_failed_credential_redirection(KeyError)
     except IndexError:
-        return userFailedCredentialRedirection(IndexError)
+        return user_failed_credential_redirection(IndexError)
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
 @app.route('/book/<competition>/<club>')
 def book(competition, club):
     if 'email' not in session:
-        return userFailedCredentialRedirection(KeyError)
+        return user_failed_credential_redirection(KeyError)
     try:
-        foundClub = [c for c in clubs if c['name'] == club][0]
-        foundCompetition = [c for c in competitions if c['name'] == competition][0]
+        found_club = [c for c in clubs if c['name'] == club][0]
+        found_competition = [c for c in competitions if c['name'] == competition][0]
 
-        if foundClub and foundCompetition:
-            if datetime.strptime(foundCompetition['date'], '%Y-%m-%d %H:%M:%S') < datetime.now():
-                flash(f"{foundCompetition['name']} is over. Book another competition.")
-                return redirect(url_for('showSummary', data=session['email']))
-            return render_template('booking.html', club=foundClub, competition=foundCompetition)
+        if found_club and found_competition:
+            if datetime.strptime(found_competition['date'], '%Y-%m-%d %H:%M:%S') < datetime.now():
+                flash(f"{found_competition['name']} is over. Book another competition.")
+                return redirect(url_for('show_summary', data=session['email']))
+            return render_template('booking.html', club=found_club, competition=found_competition)
 
     except:
         flash("Something went wrong-please try again")
-        return redirect(url_for('showSummary', data=session['email']))
+        return redirect(url_for('show_summary', data=session['email']))
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
-@app.route('/purchasePlaces', methods=['POST'])
-def purchasePlaces():
+@app.route('/purchase_places', methods=['POST'])
+def purchase_places():
     if request.method != 'POST':
-        return userFailedCredentialRedirection(KeyError)
+        return user_failed_credential_redirection(KeyError)
 
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
-    totalPointsRaquired = placesRequired * POINTS_PER_PLACE
-    if request.method == 'POST' and placesRequired:
-        tmpTotalPoints = 0
-        tmpTotalPlacesReserved = 0
+    places_required = int(request.form['places'])
+    total_points_required = places_required * POINTS_PER_PLACE
+    if request.method == 'POST' and places_required:
+        tmp_total_points = 0
+        tmp_total_places_reserved = 0
         if 'noOfPlacesBookedOnCompetitions' in club:
 
             if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
-                tmpTotalPoints = (int(club['noOfPlacesBookedOnCompetitions'][
-                                          competition['name']]) * POINTS_PER_PLACE) + totalPointsRaquired
-            tmpTotalPlacesReserved = sum(club['noOfPlacesBookedOnCompetitions'].values()) + placesRequired
+                tmp_total_points = (int(club['noOfPlacesBookedOnCompetitions'][
+                                          competition['name']]) * POINTS_PER_PLACE) + total_points_required
+            tmp_total_places_reserved = sum(club['noOfPlacesBookedOnCompetitions'].values()) + places_required
 
         else:
-            tmpTotalPoints = totalPointsRaquired
-        if int(competition['numberOfPlaces']) < placesRequired or int(club['points']) < placesRequired or \
-                tmpTotalPoints > MAX_PLACE_PER_CLUB or tmpTotalPlacesReserved > MAX_PLACE_PER_CLUB or \
+            tmp_total_points = total_points_required
+        if int(competition['numberOfPlaces']) < places_required or int(club['points']) < places_required or \
+                tmp_total_points > MAX_PLACE_PER_CLUB or tmp_total_places_reserved > MAX_PLACE_PER_CLUB or \
                 int(competition['numberOfPlaces']) == 0:
-            if int(club['points']) < totalPointsRaquired:
+            if int(club['points']) < total_points_required:
                 flash(f"Not enough points. There's only {club['points']} club points left.")
-            if int(competition['numberOfPlaces']) < placesRequired:
+            if int(competition['numberOfPlaces']) < places_required:
                 flash(f"Not enough place.There's only {competition['numberOfPlaces']} places left.")
-            if placesRequired > MAX_PLACE_PER_CLUB or tmpTotalPlacesReserved > MAX_PLACE_PER_CLUB:
+            if places_required > MAX_PLACE_PER_CLUB or tmp_total_places_reserved > MAX_PLACE_PER_CLUB:
                 flash('You can only book 12 places.')
             if int(competition['numberOfPlaces']) == 0:
                 flash("There's no more place left.")
 
-            return redirect(url_for('showSummary'))
+            return redirect(url_for('show_summary'))
 
         if 'noOfPlacesBookedOnCompetitions' in club:
             if competition['name'] in club['noOfPlacesBookedOnCompetitions']:
                 club['noOfPlacesBookedOnCompetitions'][competition['name']] = int(
-                    club['noOfPlacesBookedOnCompetitions'][competition['name']]) + placesRequired
+                    club['noOfPlacesBookedOnCompetitions'][competition['name']]) + places_required
             else:
-                club['noOfPlacesBookedOnCompetitions'][competition['name']] = placesRequired
+                club['noOfPlacesBookedOnCompetitions'][competition['name']] = places_required
         else:
             club['noOfPlacesBookedOnCompetitions'] = {}
-            club['noOfPlacesBookedOnCompetitions'][competition['name']] = placesRequired
-        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-        club['points'] = int(club['points']) - (placesRequired * POINTS_PER_PLACE)
+            club['noOfPlacesBookedOnCompetitions'][competition['name']] = places_required
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
+        club['points'] = int(club['points']) - (places_required * POINTS_PER_PLACE)
 
         flash('Great-booking complete!')
         flash(
-            f"You have succesfully booked {placesRequired} place. The club has only {club['points']} points left.")
+            f"You have succesfully booked {places_required} place. The club has only {club['points']} points left.")
 
-        return redirect(url_for('showSummary'))
+        return redirect(url_for('show_summary'))
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
 # TODO: Add route for points display
 @app.route('/points')
-def showClubPoints():
+def show_club_points():
     for club in clubs:
         if 'noOfPlacesBookedOnCompetitions' in club:
             club['totalPlaceReserved'] = sum(club['noOfPlacesBookedOnCompetitions'].values())
@@ -115,9 +115,11 @@ def showClubPoints():
 
 
 @app.route('/reservation/<competition>')
-def clubReservation(competition):
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
-    return render_template('reservation.html', clubs=clubs, competition=foundCompetition)
+def club_reservation(competition):
+    if 'email' not in session:
+        return user_failed_credential_redirection(KeyError)
+    found_competition = [c for c in competitions if c['name'] == competition][0]
+    return render_template('reservation.html', clubs=clubs, competition=found_competition)
 
 
 @app.route('/logout')
@@ -126,7 +128,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-def userFailedCredentialRedirection(error):
+def user_failed_credential_redirection(error):
     if session:
         session.clear()
     if error is KeyError:
