@@ -50,6 +50,10 @@ An application where users can book or reserve a place in strength competitions 
     * run `pytest tests/unit_test` for unit test and
     * run `pytest tests/integration_test` for test integration
     
+    To check the coverage of the test:
+    * run `pytest --cov-report term --cov=. tests/integration_test` for integration test
+    * run `pytest --cov-report term --cov=. tests/unit_test` for unit test
+    
     For locust: *make sure the application is running before running locust*
     on the other terminal:
     * activate the virtual environment
